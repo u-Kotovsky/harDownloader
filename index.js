@@ -6,6 +6,23 @@ const https = require('https');
 
 const input_path = './input/';
 const output_path = `./output/${Date.now()}`;
+
+/**
+ * Check if directories exists
+ */
+
+if (!fs.existsSync('./input/')) {
+    fs.mkdirSync('./input/');
+}
+
+if (!fs.existsSync('./output/')) {
+    fs.mkdirSync('./output');
+}
+
+/**
+ * File reader
+ */
+
 const files = fs.readdirSync(input_path);
 
 files.forEach(filename => {
@@ -18,18 +35,24 @@ files.forEach(filename => {
     }
 });
 
+/**
+ * .har parser
+ */
+
 function parseHar(filename) {
     fs.readFile(input_path + filename, async (err, data) => {
-        //const entries = JSON.parse(data).log.entries;
         const entries = JSON.parse(new TextDecoder().decode(data)).log.entries;
 
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
+
             if (entry.request.url.startsWith('http')) {
                 const correct = i + 1;
+
                 if (!await parseEntry(filename, entry)) {
                     console.log(`Downloading.. | Progress: ${correct}/${entries.length}`);
                 }
+
                 console.log((parseEntry(filename, entry)
                     ? `file not cached, downloading..`
                     : `file is cached, copying..`) + ` | ${correct}/${entries.length}`)
@@ -80,6 +103,10 @@ async function parseEntry(fn, entry) {
     });
 }
 
+/**
+ * Download func.
+ */
+
 function download(url) {
     return new Promise((resolve, reject) => {
         let client = http;
@@ -92,6 +119,7 @@ function download(url) {
             res.on('data', (chunk) => {
                 data += chunk;
             });
+            
             res.on('end', () => {
                 resolve(data);
             });
