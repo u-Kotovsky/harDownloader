@@ -1,4 +1,4 @@
-# Download files from .har
+# Automatically parsing *.har files for the url to files and downloading them automatically
 
 To use this script, install modules with using npm install command and then put .har file in input folder and then start index.js file.
 All downloaded files will be saved in output folder.
